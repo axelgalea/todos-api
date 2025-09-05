@@ -1,0 +1,15 @@
+{
+	"name": "back",
+	"scripts": {
+		"dev": "bun run --hot src/index.ts",
+		"migration:create": "drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out ./drizzle",
+		"migration:run": "bun run src/db/migrate.ts",
+		"seed:run": "bun run src/db/seed.ts"
+	},
+	"dependencies": {
+		"hono": "^4.9.6"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	}
+}
