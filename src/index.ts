@@ -24,8 +24,8 @@ app.get("/api/todos", async (c) => {
 	const [result] = await db.select({ count: count() }).from(todos);
 
 	const pages = Math.ceil(result.count / limit);
-	const prev = page > 1 ? `${API_URL}/todos?page=${page - 1}` : null;
-	const next = page < pages ? `${API_URL}/todos?page=${page + 1}` : null;
+	const prev = page > 1 ? `${API_URL}/todos?page=${page - 1}&limit=${limit}` : null;
+	const next = page < pages ? `${API_URL}/todos?page=${page + 1}&limit=${limit}` : null;
 
 	return c.json({
 		info: {
