@@ -1,0 +1,79 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on",
+				"useSortedAttributes": "off",
+				"useSortedKeys": "off",
+				"useSortedProperties": "on"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"arrowParentheses": "asNeeded",
+			"attributePosition": "multiline",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"enabled": true,
+			"expand": "auto",
+			"indentStyle": "space",
+			"indentWidth": 4,
+			"jsxQuoteStyle": "single",
+			"lineEnding": "lf",
+			"lineWidth": 180,
+			"quoteProperties": "asNeeded",
+			"quoteStyle": "single",
+			"semicolons": "always",
+			"trailingCommas": "all"
+		},
+		"globals": ["_"]
+	},
+	"linter": {
+		"rules": {
+			"a11y": {
+				"noStaticElementInteractions": "off",
+				"noSvgWithoutTitle": "off",
+				"useKeyWithClickEvents": "off"
+			},
+			"complexity": {
+				"noUselessFragments": {
+					"fix": "safe",
+					"level": "info",
+					"options": {}
+				},
+				"useOptionalChain": {
+					"fix": "safe",
+					"level": "info",
+					"options": {}
+				}
+			},
+			"correctness": {
+				"noChildrenProp": "off",
+				"noUnusedImports": {
+					"fix": "safe",
+					"level": "warn",
+					"options": {}
+				},
+				"useExhaustiveDependencies": {
+					"fix": "none",
+					"level": "off",
+					"options": {}
+				}
+			},
+			"style": {
+				"useImportType": "warn"
+			},
+			"suspicious": {
+				"noExplicitAny": "info",
+				"noThenProperty": "off"
+			}
+		}
+	},
+	"vcs": {
+		"clientKind": "git",
+		"enabled": false,
+		"useIgnoreFile": true
+	}
+}
