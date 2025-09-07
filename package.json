@@ -4,7 +4,8 @@
 		"dev": "bun run --hot src/index.ts",
 		"migration:create": "drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out ./drizzle",
 		"migration:run": "bun run --bun src/db/migrate.ts",
-		"seed:run": "bun run --bun src/db/seed.ts"
+		"seed:run": "bun run --bun src/db/seed.ts",
+		"build": "bun build --compile --outfile=todos-api src/index.ts"
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.44.5",

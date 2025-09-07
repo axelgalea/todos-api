@@ -1,0 +1,15 @@
+services:
+  api:
+    image: axelgalea/todos-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    env_file: .env
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    external: true
