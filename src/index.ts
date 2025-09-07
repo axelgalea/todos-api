@@ -1,10 +1,22 @@
 import { count, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { db } from './db';
 import { todos } from './db/schema';
 
 const API_URL = String(Bun.env.API_URL);
 const app = new Hono();
+
+app.use(
+    '/*', // Apply CORS to all routes
+    cors({
+        origin: ['http://localhost:4321'], // Allowed origins
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+        allowHeaders: ['Content-Type', 'Authorization'], // Allowed request headers
+        credentials: true, // Allow sending cookies/credentials
+        maxAge: 86400, // Preflight request cache duration (in seconds)
+    }),
+);
 
 app.get('/', c => {
     return c.text('Hello Hono!');
