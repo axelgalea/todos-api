@@ -50,10 +50,11 @@ app.get('/api/todos', async c => {
         results: await db.query.todos.findMany({
             limit: limit,
             offset: (page - 1) * limit,
+            where: (todos, { isNull }) => isNull(todos.deleted_at),
+            orderBy: [sql`${todos.completed} desc nulls first`, sql`${todos.updated_at} DESC`],
             extras: {
                 url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
             },
-            orderBy: [sql`${todos.completed} desc nulls first`, sql`${todos.updated_at} DESC`],
         }),
     });
 });
