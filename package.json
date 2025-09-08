@@ -5,11 +5,16 @@
 		"migration:create": "drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out ./drizzle",
 		"migration:run": "bun run --bun src/db/migrate.ts",
 		"seed:run": "bun run --bun src/db/seed.ts",
-		"build": "bun build --compile --outfile=todos-api src/index.ts"
+		"build": "bun build --compile --outfile=todos-api src/index.ts",
+		"docker:build": "docker build -t axelgalea/todos-api:latest .",
+		"docker:push": "docker image push axelgalea/todos-api:latest"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "^0.7.2",
 		"drizzle-orm": "^0.44.5",
-		"hono": "^4.9.6"
+		"drizzle-zod": "^0.8.3",
+		"hono": "^4.9.6",
+		"zod": "^4.1.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.3",

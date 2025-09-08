@@ -1,8 +1,9 @@
-import { count, sql } from 'drizzle-orm';
+import { zValidator } from '@hono/zod-validator';
+import { count, eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { db } from './db';
-import { todos } from './db/schema';
+import { todos, todosInsertSchema, todosUpdateSchema } from './db/schema';
 
 const API_URL = String(Bun.env.API_URL);
 const app = new Hono();
@@ -11,7 +12,7 @@ app.use(
     '/*', // Apply CORS to all routes
     cors({
         origin: ['http://localhost:4321'], // Allowed origins
-        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+        allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
         allowHeaders: ['Content-Type', 'Authorization'], // Allowed request headers
         credentials: true, // Allow sending cookies/credentials
         maxAge: 86400, // Preflight request cache duration (in seconds)
@@ -52,8 +53,16 @@ app.get('/api/todos', async c => {
             extras: {
                 url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
             },
+            orderBy: [sql`${todos.completed} desc nulls first`, sql`${todos.updated_at} DESC`],
         }),
     });
+});
+
+app.post('/api/todos', zValidator('json', todosInsertSchema), async c => {
+    const validated = c.req.valid('json');
+    const [todo] = await db.insert(todos).values(validated).returning();
+
+    return c.json(todo);
 });
 
 app.get('/api/todos/:id', async c => {
@@ -71,6 +80,70 @@ app.get('/api/todos/:id', async c => {
     }
 
     return c.json(todo);
+});
+
+app.patch('/api/todos/:id', zValidator('json', todosUpdateSchema), async c => {
+    const id = c.req.param().id;
+    const todo = await db.query.todos.findFirst({
+        where: (todos, { eq }) => eq(todos.id, id),
+        extras: {
+            url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
+        },
+    });
+
+    if (!todo) {
+        c.status(404);
+        return c.json({ message: 'Not found' });
+    }
+
+    const validated = c.req.valid('json');
+    const [updatedTodo] = await db.update(todos).set(validated).where(eq(todos.id, id)).returning();
+
+    return c.json(updatedTodo);
+});
+
+app.patch('/api/todos/:id/toggle-completed', async c => {
+    const id = c.req.param().id;
+    const todo = await db.query.todos.findFirst({
+        where: (todos, { eq }) => eq(todos.id, id),
+        extras: {
+            url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
+        },
+    });
+
+    if (!todo) {
+        c.status(404);
+        return c.json({ message: 'Not found' });
+    }
+
+    const [updatedTodo] = await db
+        .update(todos)
+        .set({
+            completed: todo.completed ? null : new Date(),
+        })
+        .where(eq(todos.id, id))
+        .returning();
+
+    return c.json(updatedTodo);
+});
+
+app.delete('/api/todos/:id', async c => {
+    const id = c.req.param().id;
+    const todo = await db.query.todos.findFirst({
+        where: (todos, { eq }) => eq(todos.id, id),
+        extras: {
+            url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
+        },
+    });
+
+    if (!todo) {
+        c.status(404);
+        return c.json({ message: 'Not found' });
+    }
+
+    const [deletedTodo] = await db.update(todos).set({ deleted_at: new Date() }).where(eq(todos.id, id)).returning();
+
+    return c.json(deletedTodo);
 });
 
 export default app;
