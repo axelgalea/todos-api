@@ -11,11 +11,11 @@ const app = new Hono();
 app.use(
     '/*', // Apply CORS to all routes
     cors({
-        origin: ['https://todos.rocketicg.cl'], // Allowed origins
+        origin: ['*'],
         allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
         allowHeaders: ['Content-Type', 'Authorization'], // Allowed request headers
         credentials: true, // Allow sending cookies/credentials
-        maxAge: 86400, // Preflight request cache duration (in seconds)
+        maxAge: 600, // Preflight request cache duration (in seconds)
     }),
 );
 
