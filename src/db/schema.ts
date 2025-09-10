@@ -1,5 +1,6 @@
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
+import * as z from 'zod';
 
 export const todos = pgTable('todos', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -13,5 +14,10 @@ export const todos = pgTable('todos', {
     deleted_at: timestamp('deleted_at'),
 });
 
-export const todosInsertSchema = createInsertSchema(todos);
-export const todosUpdateSchema = createUpdateSchema(todos);
+export const todosInsertSchema = createInsertSchema(todos, {
+    completed: z.coerce.date(),
+});
+
+export const todosUpdateSchema = createUpdateSchema(todos, {
+    completed: z.coerce.date(),
+});

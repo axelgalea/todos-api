@@ -6,12 +6,13 @@ import { db } from './db';
 import { todos, todosInsertSchema, todosUpdateSchema } from './db/schema';
 
 const API_URL = String(Bun.env.API_URL);
-const app = new Hono();
+const app = new Hono(
+);
 
 app.use(
     '/*', // Apply CORS to all routes
     cors({
-        origin: ['*'],
+        origin: ['http://localhost:4321'],
         allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
         allowHeaders: ['Content-Type', 'Authorization'], // Allowed request headers
         credentials: true, // Allow sending cookies/credentials
@@ -61,6 +62,7 @@ app.get('/api/todos', async c => {
 
 app.post('/api/todos', zValidator('json', todosInsertSchema), async c => {
     const validated = c.req.valid('json');
+    console.log(validated);
     const [todo] = await db.insert(todos).values(validated).returning();
 
     return c.json(todo);
@@ -98,32 +100,10 @@ app.patch('/api/todos/:id', zValidator('json', todosUpdateSchema), async c => {
     }
 
     const validated = c.req.valid('json');
-    const [updatedTodo] = await db.update(todos).set(validated).where(eq(todos.id, id)).returning();
-
-    return c.json(updatedTodo);
-});
-
-app.patch('/api/todos/:id/toggle-completed', async c => {
-    const id = c.req.param().id;
-    const todo = await db.query.todos.findFirst({
-        where: (todos, { eq }) => eq(todos.id, id),
-        extras: {
-            url: sql<string>`${API_URL} || '/todos/' || ${todos.id}`.as('url'),
-        },
-    });
-
-    if (!todo) {
-        c.status(404);
-        return c.json({ message: 'Not found' });
-    }
-
-    const [updatedTodo] = await db
-        .update(todos)
-        .set({
-            completed: todo.completed ? null : new Date(),
-        })
-        .where(eq(todos.id, id))
-        .returning();
+    const [updatedTodo] = await db.update(todos).set({
+        ...validated,
+        updated_at: new Date(),
+    }).where(eq(todos.id, id)).returning();
 
     return c.json(updatedTodo);
 });
