@@ -1,8 +1,9 @@
 import { sql } from 'drizzle-orm';
+import type { DBTransaction } from '@/db';
 
 type Txid = number;
 
-export async function generateTxId(tx: any): Promise<Txid> {
+export async function generateTxId(tx: DBTransaction): Promise<Txid> {
     // The ::xid cast strips off the epoch, giving you the raw 32-bit value
     // that matches what PostgreSQL sends in logical replication streams
     // (and then exposed through Electric which we'll match against

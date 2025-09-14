@@ -2,10 +2,11 @@ import { ELECTRIC_PROTOCOL_QUERY_PARAMS } from '@electric-sql/client';
 import { zValidator } from '@hono/zod-validator';
 import { count, eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+
 import { config } from '@/config';
 import { db } from '@/db';
 import { todos, todosInsertSchema, todosUpdateSchema } from '@/db/schema';
-import { generateTxId } from '@/db/utils';
+import { generateTxId } from '@/utils/db.utils';
 
 const { API_URL, ELECTRIC_URL } = config;
 export const routesTodos = new Hono();

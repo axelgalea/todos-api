@@ -1,5 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+
 import { db } from '@/db';
 import { users, usersInsertSchema } from '@/db/schema/users.schema';
 import { alreadyLoggedInMiddleware } from '@/middlewares/auth.middleware';

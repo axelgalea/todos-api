@@ -17,7 +17,7 @@ export const authMiddleware = createMiddleware<{ Variables: Variables }>(async (
 
     if (!token) {
         c.status(401);
-        return c.json({ message: 'Unauthorized' });
+        return c.json({ message: 'Unauthorized', cause: 'missing_token' });
     }
 
     const payload = (await verify(token, config.JWT_SECRET)) as JwtPayload;
@@ -31,7 +31,7 @@ export const authMiddleware = createMiddleware<{ Variables: Variables }>(async (
 
         if (!user || user.refresh_token === null) {
             c.status(401);
-            return c.json({ message: 'Unauthorized', cause: 'no_refresh_token' });
+            return c.json({ message: 'Unauthorized', cause: 'missing_refresh_token' });
         }
 
         const refreshToken = await verify(user.refresh_token, config.JWT_SECRET);
