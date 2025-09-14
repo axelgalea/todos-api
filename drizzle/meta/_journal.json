@@ -8,6 +8,27 @@
       "when": 1757039884148,
       "tag": "0000_white_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757796032834,
+      "tag": "0001_amazing_tigra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757857086495,
+      "tag": "0002_illegal_the_professor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757861477017,
+      "tag": "0003_outstanding_sheva_callister",
+      "breakpoints": true
     }
   ]
 }
