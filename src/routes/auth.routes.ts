@@ -2,16 +2,14 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 
 import { db } from '@/db';
-import { users, usersInsertSchema } from '@/db/schema/users.schema';
-import { alreadyLoggedInMiddleware } from '@/middlewares/auth.middleware';
-import { loginSchema } from '@/schemas/auth.schema';
-import { issueTokens, verifyPassword } from '@/utils/auth.utils';
+import { users } from '@/db/schema/users.schema';
+import { alreadyLoggedInMiddleware, authMiddleware } from '@/middlewares/auth.middleware';
+import { loginSchema, registerSchema } from '@/schemas/auth.schema';
+import { hashPassword, issueTokens, verifyPassword } from '@/utils/auth.utils';
 
 export const routesAuth = new Hono();
 
-routesAuth.use('*', alreadyLoggedInMiddleware);
-
-routesAuth.post('/login', zValidator('json', loginSchema), async c => {
+routesAuth.post('/login', zValidator('json', loginSchema), alreadyLoggedInMiddleware, async c => {
     const { email, password } = c.req.valid('json');
 
     const user = await db.query.users.findFirst({
@@ -52,7 +50,21 @@ routesAuth.post('/login', zValidator('json', loginSchema), async c => {
     });
 });
 
-routesAuth.post('/register', zValidator('json', usersInsertSchema), async c => {
+routesAuth.get('/current-user', authMiddleware, async c => {
+    const payload = await c.get('jwtPayload');
+
+    return c.json({
+        user: await db.query.users.findFirst({
+            where: (users, { eq }) => eq(users.id, payload.sub),
+            columns: {
+                password: false,
+                refresh_token: false,
+            },
+        }),
+    });
+});
+
+routesAuth.post('/register', zValidator('json', registerSchema), alreadyLoggedInMiddleware, async c => {
     const { name, email, password } = c.req.valid('json');
 
     const user = await db.query.users.findFirst({
@@ -72,7 +84,7 @@ routesAuth.post('/register', zValidator('json', usersInsertSchema), async c => {
         .values({
             name,
             email,
-            password,
+            password: await hashPassword(password),
         })
         .returning();
 

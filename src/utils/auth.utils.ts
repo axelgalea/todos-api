@@ -56,5 +56,9 @@ export async function issueTokens(c: Context, user: User) {
 }
 
 export const verifyPassword = async (input: string, original: string) => {
-    return await Bun.password.verify(input, original);
+    return Bun.password.verify(input, original);
+};
+
+export const hashPassword = async (password: string) => {
+    return Bun.password.hash(password);
 };
