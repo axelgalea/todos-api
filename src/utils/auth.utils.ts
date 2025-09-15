@@ -1,11 +1,13 @@
 import { eq } from 'drizzle-orm';
 import type { Context } from 'hono';
-import { setCookie } from 'hono/cookie';
+import { deleteCookie, setCookie } from 'hono/cookie';
 import { sign } from 'hono/jwt';
 import { DateTime, Duration } from 'luxon';
 import { config } from '@/config';
 import { db } from '@/db';
 import { type User, users } from '@/db/schema';
+
+const AUTH_COOKIE_NAME = 'x-auth-token';
 
 export const generateTokens = async (user: User) => {
     const token_exp = Math.floor(DateTime.now().plus({ minutes: config.JWT_EXPIRATION_IN_MINUTES }).toSeconds());
@@ -23,13 +25,17 @@ export const generateTokens = async (user: User) => {
 };
 
 export const setTokenCookie = async (c: Context, token: string) => {
-    setCookie(c, 'x-auth-token', token, {
+    setCookie(c, AUTH_COOKIE_NAME, token, {
         httpOnly: true,
         secure: true,
         expires: DateTime.now().plus({ minutes: config.JWT_EXPIRATION_IN_MINUTES }).toJSDate(),
         maxAge: Duration.fromObject({ minutes: config.JWT_EXPIRATION_IN_MINUTES }).toMillis(),
         sameSite: 'Strict',
     });
+};
+
+export const removeTokenCookie = async (c: Context) => {
+    deleteCookie(c, AUTH_COOKIE_NAME);
 };
 
 export const updateRefreshToken = async (id: string, refresh_token: string | null) => {

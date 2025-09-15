@@ -5,7 +5,8 @@ import { db } from '@/db';
 import { users } from '@/db/schema/users.schema';
 import { alreadyLoggedInMiddleware, authMiddleware } from '@/middlewares/auth.middleware';
 import { loginSchema, registerSchema } from '@/schemas/auth.schema';
-import { hashPassword, issueTokens, verifyPassword } from '@/utils/auth.utils';
+import { hashPassword, issueTokens, removeTokenCookie, verifyPassword } from '@/utils/auth.utils';
+import { eq } from 'drizzle-orm';
 
 export const routesAuth = new Hono();
 
@@ -17,23 +18,19 @@ routesAuth.post('/login', zValidator('json', loginSchema), alreadyLoggedInMiddle
     });
 
     if (!user || user.deleted_at !== null) {
-        c.status(401);
-
         return c.json({
             message: 'Unauthorized',
             cause: 'invalid_credentials',
-        });
+        }, 401);
     }
 
     const isValidPassword = await verifyPassword(password, user.password);
 
     if (!isValidPassword) {
-        c.status(401);
-
         return c.json({
             message: 'Unauthorized',
             cause: 'invalid_credentials',
-        });
+        }, 401);
     }
 
     await issueTokens(c, user);
@@ -51,7 +48,7 @@ routesAuth.post('/login', zValidator('json', loginSchema), alreadyLoggedInMiddle
 });
 
 routesAuth.get('/current-user', authMiddleware, async c => {
-    const payload = await c.get('jwtPayload');
+    const payload = c.get('jwtPayload');
 
     return c.json({
         user: await db.query.users.findFirst({
@@ -72,11 +69,9 @@ routesAuth.post('/register', zValidator('json', registerSchema), alreadyLoggedIn
     });
 
     if (user) {
-        c.status(400);
-
         return c.json({
             message: 'User already exists',
-        });
+        }, 400);
     }
 
     const [newUser] = await db
@@ -101,3 +96,14 @@ routesAuth.post('/register', zValidator('json', registerSchema), alreadyLoggedIn
         },
     });
 });
+
+routesAuth.post('/logout', authMiddleware, async c => {
+    const payload = c.get('jwtPayload');
+    removeTokenCookie(c);
+
+    await db.update(users).set({ refresh_token: null }).where(eq(users.id, payload.sub))
+
+    return c.json({
+        message: 'Logged out successfully'
+    })
+})

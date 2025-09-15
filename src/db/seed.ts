@@ -1,3 +1,4 @@
+import { hashPassword } from '@/utils/auth.utils';
 import { db } from './index';
 import * as schema from './schema';
 
@@ -14,6 +15,15 @@ async function seed() {
         {
             title: 'J.K. Rowling',
             description: 'The creator of the Harry Potter series.',
+        },
+    ]);
+
+    await db.insert(schema.users).values([
+        {
+            name: 'Axel Galea',
+            email: 'axel.w.galea@gmail.com',
+            password: await hashPassword('2202@@)@'),
+            role: 'admin',
         },
     ]);
 }
